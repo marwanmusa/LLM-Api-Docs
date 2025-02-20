@@ -1,0 +1,223 @@
+
+
+/* Global container takes full height */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: "Inter", sans-serif;
+}
+
+/* Main App container */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+}
+
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0rem 1rem;
+  border-bottom: 1px solid #ccc;
+  color: #ffffff;
+  height: 60px
+}
+
+
+/* Header Left (Logo) */
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-left .logo {
+  height: 40px;
+  margin-right: 0.5rem;
+}
+/* Header Right (User Info) */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.username {
+  font-weight: 600;
+}
+
+/* Chat Container */
+.chat-container {
+   flex: 1;
+   overflow-y: auto;
+   padding-bottom: 3rem; /* To make space for input */
+   padding-right: 3rem;
+   padding-left: 3rem;
+}
+
+.user-question-header {
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: 3rem;
+}
+
+.user-questions {
+  border: 2px solid #ccc;
+  border-radius: 0px 10px 0px 10px;
+  padding: 0.5rem 0.5rem;
+  width: fit-content;
+  font-style: italic;
+}
+
+.ai-answers {
+  border: 2px solid #ccc;
+  border-radius: 10px 0px 10px 0px;
+  padding: 0.5rem 0.5rem;
+  width: fit-content;
+}
+
+.assistant-answer {
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Chat input box */
+.chat-input {
+  /* width: 100%; */
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 5px;
+}
+
+.chat-input input {
+  flex: 1;
+  max-width: 80%;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+
+/* MAIN LAYOUT */
+.main-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* LEFT SIDEBAR */
+.left-sidebar {
+  width: 20%;
+  min-width: 250px;
+  padding: 1rem;
+  box-sizing: border-box;
+  border-right: 1px solid #ccc;
+  overflow-y: auto;
+}
+
+.api-url-input {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 1em;
+  border: 1px solid #ffffff;
+  color: #b8b8b8;
+}
+
+.api-explanation-input{
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+  height: 5rem;
+  color: #b8b8b8;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+  border-bottom: 1px solid #ffffff;
+  width: 100%;
+}
+
+.left-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.right-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Sidebar converstation list */
+.list-conversation {
+  color: #ffffff;
+}
+
+.time-tracker {
+  font-size: small;
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+}
+
+.conversations {
+  margin-left: 1rem;
+}
+
+.conversation-section {
+  margin-bottom: 1.5em;
+}
+
+/* MAIN CONTENT */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  position: relative; /* Ensure positioning works */
+  margin-top: 1rem;
+}
+
+/* Input fields at the top */
+.top-inputs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+
+/* Icons */
+.chat-icon {
+  width: 25px;
+  height: 25px;
+}
+
+.ai-icon {
+  width: 25px;
+  height: 25px;
+  margin: 0.5rem;
+}
+
+.user-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}

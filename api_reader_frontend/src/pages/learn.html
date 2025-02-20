@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<p id="demo"></p>
+<p id="demo2"></p>
+
+<script>
+// let text = "Hello Everybody! ";
+// text += "What do you think?";
+
+let a = 'g', b = 'b';
+
+let x = 10;
+x |= 5;
+
+const person = {
+  firstName: "John",
+  lastName: "Doe",
+  id: 5566,
+  fullName: function() {
+    return this.firstName + " " + this.lastName;
+  }
+};
+
+// Create an Array
+const myArray = Object.values(person);
+
+const fruits = {Bananas:300, Oranges:200, Apples:500};
+
+let text = "";
+for (let [fruit, value] of Object.entries(fruits)) {
+  text += fruit + ": " + value + "<br>";
+}
+
+let text1 = "5";
+let padded = text1.replace(text1, "safafsafas");
+
+let text2 = "The rain in SPAIN stays mainly in the plain";
+text2.match("ain");
+
+let header = "Template Strings";
+let tags = ["template strings", "javascript", "es6"];
+
+let html = `<h2>${header}</h2><ul>`;
+for (const x of tags) {
+  html += `<li>${x}</li>`;
+}
+
+html += `</ul>`;
+
+// Display the Array:
+document.getElementById("demo").innerHTML = html;
+</script>
+
+</body>
+</html>
