@@ -2,7 +2,7 @@
 **Description:**
 API Explorer Chat is an interactive API documentation tool that enables users to upload and explore API definitions (JSON format, similar to Swagger). It enhances API understanding by allowing users to add textual explanations to each API and interact with an AI-powered chatbot that answers questions based on the provided API data.
 
-Key Features:
+Key Features: <br>
 ✅ Upload JSON files or enter stringified JSON containing API definitions. <br>
 ✅ View and manage API details dynamically.<br>
 ✅ Add custom explanations to each API for better clarity.<br>
