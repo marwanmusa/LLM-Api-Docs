@@ -3,5 +3,6 @@ venv/
 db.sqlite3
 
 .env
+.pyc
 .python-version
 .vscode/
