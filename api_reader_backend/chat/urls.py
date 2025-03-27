@@ -1,23 +1,24 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework_nested import routers
 from .views import (
-    APIDocumentationView,
-    APIEndpointView,
-    ChatView,
-    UserAPIKeyView
+    APIDocumentationViewSet,
+    APIEndpointViewSet,
+    ChatViewSet,
+    UserAPIKeyViewSet
 )
 
+# Create the main router
+router = routers.DefaultRouter()
+router.register(r'api-docs', APIDocumentationViewSet, basename='api-docs')
+router.register(r'api-keys', UserAPIKeyViewSet, basename='api-keys')
+router.register(r'chat', ChatViewSet, basename='chat')
+
+# Create nested router for API endpoints
+api_docs_router = routers.NestedDefaultRouter(router, r'api-docs', lookup='api_doc')
+api_docs_router.register(r'endpoints', APIEndpointViewSet, basename='api-endpoints')
+
+# The DefaultRouter class includes a default API root view
 urlpatterns = [
-    # API Documentation endpoints
-    path('api-docs/', APIDocumentationView.as_view(), name='api-docs'),
-    
-    # API Endpoints
-    path('api-docs/<uuid:api_doc_id>/endpoints/', APIEndpointView.as_view(), name='api-endpoints'),
-    
-    # Chat endpoints
-    path('chat/', ChatView.as_view(), name='chat'),
-    path('chat/<uuid:conversation_id>/', ChatView.as_view(), name='chat-detail'),
-    
-    # User API Key endpoints
-    path('api-keys/', UserAPIKeyView.as_view(), name='api-keys'),
-    path('api-keys/<uuid:key_id>/', UserAPIKeyView.as_view(), name='api-key-detail'),
+    path('', include(router.urls)),
+    path('', include(api_docs_router.urls)),
 ]
