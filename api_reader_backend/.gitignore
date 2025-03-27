@@ -1,0 +1,10 @@
+__pycache__/
+venv/
+db.sqlite3
+
+.env
+.pyc
+.python-version
+.vscode/
+
+local_settings.py
