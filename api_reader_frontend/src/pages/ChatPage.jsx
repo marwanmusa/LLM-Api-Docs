@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { apiDocs } from '../data/apiDocs';
-import DocsSidebar from '../components/DocsSidebar';
 import ChatMessage from '../components/ChatMessage';
 import ChatInput from '../components/ChatInput';
 
@@ -47,25 +46,39 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-full bg-gray-50 dark:bg-gray-900">
-      <DocsSidebar selectedApiId={apiId} />
-      {/* Right side: Chat interface */}
-      <div className="flex flex-col flex-1">
-        {/* Top section: API info */}
-        <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <h2 className="text-gray-800 dark:text-gray-100 font-semibold">{api.name}</h2>
+    <div className="flex flex-col h-full bg-white dark:bg-gray-800">
+      {/* Top navigation */}
+      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{api.name}</h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">{api.baseUrl}</p>
         </div>
-        {/* Chat history (messages) */}
-        <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-gray-800">
-          {messages.map((msg, idx) => (
-            <ChatMessage key={idx} message={msg} />
-          ))}
+        <div className="flex space-x-2">
+          <Link 
+            to={`/docs`} 
+            className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+          >
+            View Documentation
+          </Link>
+          <Link 
+            to="/" 
+            className="text-gray-600 dark:text-gray-400 hover:underline text-sm"
+          >
+            Home
+          </Link>
         </div>
-        {/* Input box */}
-        <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700">
-          <ChatInput onSend={handleSendMessage} />
-        </div>
+      </div>
+
+      {/* Chat container */}
+      <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
+        {messages.map((msg, idx) => (
+          <ChatMessage key={idx} message={msg} />
+        ))}
+      </div>
+
+      {/* Input area */}
+      <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <ChatInput onSend={handleSendMessage} />
       </div>
     </div>
   );
