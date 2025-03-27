@@ -1,7 +1,6 @@
-from rest_framework.views import APIView
+from rest_framework import viewsets, status, permissions
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status, permissions
-from rest_framework.decorators import permission_classes
 from django.shortcuts import get_object_or_404
 from .models import APIDocumentation, APIEndpoint, Conversation, Message, VectorCache, UserAPIKey
 from .serializers import (
@@ -18,73 +17,62 @@ import openai
 from django.conf import settings
 import json
 
-class APIDocumentationView(APIView):
+class APIDocumentationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = APIDocumentationSerializer
 
-    @cache_api_response('api_docs')
-    def get(self, request):
-        """Retrieve all API documentation for the current user."""
-        docs = APIDocumentation.objects.filter(user=request.user)
-        serializer = APIDocumentationSerializer(docs, many=True)
+    def get_queryset(self):
+        return APIDocumentation.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+        invalidate_api_cache('api_docs')
+
+    def perform_update(self, serializer):
+        serializer.save()
+        invalidate_api_cache('api_docs')
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        invalidate_api_cache('api_docs')
+
+class APIEndpointViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = APIEndpointSerializer
+
+    def get_queryset(self):
+        api_doc_id = self.kwargs.get('api_doc_id')
+        return APIEndpoint.objects.filter(api_doc_id=api_doc_id)
+
+    def perform_create(self, serializer):
+        api_doc = get_object_or_404(APIDocumentation, id=self.kwargs.get('api_doc_id'), user=self.request.user)
+        serializer.save(api_doc=api_doc)
+        invalidate_api_cache('api_endpoints')
+
+    def perform_update(self, serializer):
+        serializer.save()
+        invalidate_api_cache('api_endpoints')
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        invalidate_api_cache('api_endpoints')
+
+class ChatViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ConversationSerializer
+
+    def get_queryset(self):
+        return Conversation.objects.filter(user=self.request.user)
+
+    @action(detail=True, methods=['get'])
+    def messages(self, request, pk=None):
+        conversation = self.get_object()
+        messages = conversation.messages.all().order_by('created_at')
+        serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
-        """Create new API documentation."""
-        serializer = APIDocumentationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            # Invalidate cache after creating new documentation
-            invalidate_api_cache('api_docs')
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class APIEndpointView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    @cache_api_response('api_endpoints')
-    def get(self, request, api_doc_id):
-        """Retrieve all endpoints for a specific API documentation."""
-        endpoints = APIEndpoint.objects.filter(api_doc_id=api_doc_id)
-        serializer = APIEndpointSerializer(endpoints, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, api_doc_id):
-        """Create a new endpoint for an API documentation."""
-        api_doc = get_object_or_404(APIDocumentation, id=api_doc_id, user=request.user)
-        serializer = APIEndpointSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(api_doc=api_doc)
-            # Invalidate cache after creating new endpoint
-            invalidate_api_cache('api_endpoints')
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class ChatView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    @cache_api_response('conversations')
-    def get(self, request, conversation_id=None):
-        """Retrieve conversation history."""
-        if conversation_id:
-            # Try to get from cache first
-            cached_conversation = get_cached_conversation(conversation_id)
-            if cached_conversation:
-                return Response(cached_conversation)
-            
-            conversation = get_object_or_404(Conversation, id=conversation_id, user=request.user)
-            serializer = ConversationSerializer(conversation)
-            response_data = serializer.data
-            
-            # Cache the conversation
-            cache_conversation_history(conversation_id, response_data)
-            return Response(response_data)
-        else:
-            conversations = Conversation.objects.filter(user=request.user)
-            serializer = ConversationSerializer(conversations, many=True)
-            return Response(serializer.data)
-
-    def post(self, request):
-        """Create a new message in a conversation."""
+    @action(detail=False, methods=['post'])
+    def send_message(self, request):
         data = request.data
         conversation_id = data.get('conversation_id')
         message_content = data.get('message')
@@ -192,30 +180,21 @@ class ChatView(APIView):
                 "ai_message": MessageSerializer(ai_message).data
             })
 
-class UserAPIKeyView(APIView):
+class UserAPIKeyViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserAPIKeySerializer
 
-    @cache_api_response('api_keys')
-    def get(self, request):
-        """Retrieve user's API keys."""
-        api_keys = UserAPIKey.objects.filter(user=request.user)
-        serializer = UserAPIKeySerializer(api_keys, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return UserAPIKey.objects.filter(user=self.request.user)
 
-    def post(self, request):
-        """Add a new API key."""
-        serializer = UserAPIKeySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            # Invalidate cache after adding new API key
-            invalidate_api_cache('api_keys')
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, key_id):
-        """Delete an API key."""
-        api_key = get_object_or_404(UserAPIKey, id=key_id, user=request.user)
-        api_key.delete()
-        # Invalidate cache after deleting API key
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
         invalidate_api_cache('api_keys')
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_update(self, serializer):
+        serializer.save()
+        invalidate_api_cache('api_keys')
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        invalidate_api_cache('api_keys')

@@ -14,23 +14,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-# Create a simple root API view
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
-# Create a simple root API view
-class APIRootView(APIView):
-    def get(self, request):
-        return Response({
-            "chat_history": "/api/chat-history/",  # List all chat sessions
-            "chat_history_detail": "/api/chat-history/{chat_id}/",  # Retrieve a specific chat
-            "clear_history": "/api/clear-history/",  # Clear all chat history
-        })
+from rest_framework.authtoken import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('chat.urls')),  # Include chat app's URLs
-    path('', APIRootView.as_view(), name='api-root'),  # Default root URL
+    path('', include('chat.urls')),  # Remove 'api/' prefix
+    path('api-auth/', include('rest_framework.urls')),  # DRF authentication URLs
+    path('api-token-auth/', auth_views.obtain_auth_token),  # Token authentication endpoint
 ]
